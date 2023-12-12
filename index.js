@@ -1,4 +1,3 @@
-
 const excelInput = document.getElementById("excel-input");
 const databaseInput = document.getElementById("database-input");
 const contentXls = document.getElementById("content-xls");
@@ -7,8 +6,8 @@ const btnClear = document.getElementById("btnClear");
 const tableInput = document.getElementById("table-input")
 const divChecks = document.getElementById("checksD")
 const btnRealizarScript = document.getElementById("btnRealizarScript")
+let nombreDocumento = ''
 
-// const btnCheck = document.getElementById("btn-check")
 contentXls.value = ""
 class Excel{
     constructor(content){
@@ -38,35 +37,9 @@ excelInput.addEventListener('change',async function(){
             texto = texto + excel.header()[i] + ","
         arrayChecks.push(excel.header()[i])
     }
+
+    nombreDocumento = tableInput.value
     
-    // let contentRow = ''
-    // let estructura =''
-    // for(let i = 0; i < excel.rows().length; i++){
-    //     contentRow = ""
-    //     for( let j = 0; j < excel.rows()[i].length; j++){
-    //         if(typeof(excel.rows()[i][j]) === 'object'){
-    //             excel.rows()[i][j] = formatearFecha(excel.rows()[i][j])
-    //         }
-
-    //         if(j === excel.rows()[j].length - 1 )
-    //             contentRow = `${contentRow} ${excel.rows()[i][j].toString().toLowerCase().includes('null') || excel.rows()[i][j].toString().toLowerCase().includes('getdate()') ?excel.rows()[i][j]:`'${excel.rows()[i][j]}'`}` 
-    //         else
-    //             contentRow = `${contentRow} ${excel.rows()[i][j].toString().toLowerCase().includes('null') || excel.rows()[i][j].toString().toLowerCase().includes('getdate()') ?excel.rows()[i][j]:`'${excel.rows()[i][j]}'`},`
-            
-    //     }
-    //     //console.log(contentRow)
-    //     estructura = `${estructura}\n       IF NOT EXISTS ( SELECT 1 FROM ${tableInput.value} WHERE Campo = Valor)
-    //     BEGIN
-    //         INSERT INTO ${tableName} (${texto}) VALUES (${contentRow}); 
-    //     END
-    //     ELSE
-    //     BEGIN
-    //         PRINT('Este registro ya existe');
-    //     END`
-        
-    // }
-
-    console.log(arrayChecks)
     let checksButtons =''
     for(let i = 0; i < arrayChecks.length; i++){
         checksButtons = `${checksButtons}\n<div class="col-4 col-md-4 col-lg-3">
@@ -75,9 +48,6 @@ excelInput.addEventListener('change',async function(){
                         </div>`    
     }
     divChecks.innerHTML = checksButtons;
-
-
-    // contentXls.value = estructura
 })
 
 btnRealizarScript.addEventListener('click', async function(){
@@ -107,8 +77,6 @@ btnRealizarScript.addEventListener('click', async function(){
         }
     }
 
-
-    console.log(arrayCheckeds)
     let whereString = ''
     let contentRow = ''
     let estructura =`USE [${databaseInput.value}]
@@ -127,7 +95,7 @@ btnRealizarScript.addEventListener('click', async function(){
                 }
             }
             if(typeof(excel.rows()[i][j]) === 'object'){
-                excel.rows()[i][j] = formatearFecha(excel.rows()[i][j])
+                excel.rows()[i][j] = excel.rows()[i][j] != null ? formatearFecha(excel.rows()[i][j]) : ""
             }
 
             if(j === excel.rows()[j].length - 1 )
@@ -136,8 +104,7 @@ btnRealizarScript.addEventListener('click', async function(){
                 contentRow = `${contentRow} ${excel.rows()[i][j].toString().toLowerCase().includes('null') || excel.rows()[i][j].toString().toLowerCase().includes('getdate()') ?excel.rows()[i][j]:`'${excel.rows()[i][j]}'`},`
             
         }
-        console.log(whereString)
-        //console.log(contentRow)
+
         estructura = `${estructura}\n       IF NOT EXISTS ( SELECT 1 FROM ${tableInput.value} WHERE ${whereString})
         BEGIN
             INSERT INTO [dbo].[${tableName}] (${texto}) VALUES (${contentRow}); 
@@ -149,6 +116,7 @@ btnRealizarScript.addEventListener('click', async function(){
         END`
         
     }
+
     estructura = estructura + `\nEND TRY 
     BEGIN CATCH
         SELECT 'Insert Incorrecto'  AS [Mensaje ejecución]   ,CAST (ERROR_NUMBER() AS NVARCHAR(1000)) AS [Dato_Error_ERROR_NUMBER()  ]
@@ -202,7 +170,7 @@ btnClear.addEventListener('click', function(){
 
 function exportarTexto(content){
     var fileContent = content;
-    var fileName = 'sampleFile.sql';
+    var fileName = `[INSERT]_${nombreDocumento}.sql`;
 
     const blob = new Blob([fileContent], { type: 'text/plain' });
     const a = document.createElement('a');
@@ -212,7 +180,3 @@ function exportarTexto(content){
 
 
 }
-
-// btnCheck.addEventListener('click', function(){
-//     console.log("entra al check"+ btnCheck.checked)
-// })
